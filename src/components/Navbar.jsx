@@ -33,7 +33,12 @@ function Navbar() {
           <h1 className='font-medium text-lg text-white'>
             <a href='/move'>MoveLab</a>
           </h1>
-
+          <h1 
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-1 font-bold border-purple-500 border-2 rounded-md shadow-lg hover:opacity-100 transition-opacity duration-300 transform hover:scale-105"
+            onClick={() => window.location.href='/eliza'}
+          >
+            Eliza
+          </h1>
           </div>
           <div className='text-white'>
            <ConnectButton/>
