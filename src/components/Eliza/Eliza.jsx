@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 const Eliza = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [selectedBox, setSelectedBox] = useState(null);
 
   // Add initial welcome message
   useEffect(() => {
@@ -50,7 +51,51 @@ const Eliza = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-gray-100 p-4 md:p-8">
-      <div className="w-full max-w-4xl mx-auto h-[80vh] flex flex-col 
+      {/* Info Boxes */}
+      <div className="w-full max-w-4xl mx-auto mb-6 flex gap-4">
+        <div 
+          onClick={() => setSelectedBox('movement')}
+          className={`flex-1 p-4 border border-gray-700 rounded-xl backdrop-blur-sm shadow-xl 
+                     cursor-pointer transition-all duration-300 hover:scale-[1.02]
+                     ${selectedBox === 'movement' 
+                       ? 'bg-gradient-to-r from-purple-600 to-pink-600' 
+                       : 'bg-gray-900/50'}`}
+        >
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Movement Labs</h3>
+          <div className={`p-3 rounded-lg ${
+            selectedBox === 'movement'
+              ? 'bg-white/10'
+              : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20'
+          }`}>
+            <p className="text-sm text-gray-300">
+              Empowering blockchain movement with innovative solutions and research.
+            </p>
+          </div>
+        </div>
+        
+        <div 
+          onClick={() => setSelectedBox('eigen')}
+          className={`flex-1 p-4 border border-gray-700 rounded-xl backdrop-blur-sm shadow-xl 
+                     cursor-pointer transition-all duration-300 hover:scale-[1.02]
+                     ${selectedBox === 'eigen' 
+                       ? 'bg-gradient-to-r from-purple-600 to-pink-600' 
+                       : 'bg-gray-900/50'}`}
+        >
+          <h3 className="text-lg font-semibold text-gray-100 mb-2">Eigen Layer</h3>
+          <div className={`p-3 rounded-lg ${
+            selectedBox === 'eigen'
+              ? 'bg-white/10'
+              : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20'
+          }`}>
+            <p className="text-sm text-gray-300">
+              Advanced blockchain scaling solutions with modular architecture.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chatbot Container */}
+      <div className="w-full max-w-4xl mx-auto h-[70vh] flex flex-col 
                     border border-gray-700 rounded-xl overflow-hidden
                     bg-gray-900/50 backdrop-blur-sm shadow-xl">
         {/* Chat Header */}
@@ -71,7 +116,7 @@ const Eliza = () => {
                 <div
                   className={`max-w-sm p-4 rounded-lg ${
                     message.sender === 'user'
-                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20'
                       : 'bg-gray-800 text-gray-100 shadow-lg shadow-gray-900/30'
                   }`}
                 >
@@ -91,14 +136,14 @@ const Eliza = () => {
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type your message..."
               className="flex-1 p-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 
-                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 
+                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 
                        focus:border-transparent"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white 
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white 
                        rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg 
-                       shadow-violet-500/20 hover:shadow-violet-500/40 font-medium"
+                       shadow-purple-500/20 hover:shadow-purple-500/40 font-medium"
             >
               Send
             </button>
