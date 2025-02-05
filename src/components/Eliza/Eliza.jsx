@@ -4,49 +4,98 @@ const Eliza = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [selectedBox, setSelectedBox] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [rateLimitTimer, setRateLimitTimer] = useState(0);
 
-  // Add initial welcome message
+  // Initialize with welcome message based on selected box
   useEffect(() => {
-    setMessages([
-      { 
-        text: "Hello! I'm Eliza, your virtual assistant. How can I help you today?", 
-        sender: 'eliza' 
-      }
-    ]);
-  }, []);
+    if (selectedBox === 'eigen') {
+      setMessages([
+        { 
+          text: "Hello! I'm Eliza, your EigenLayer assistant. I can help you understand EigenLayer's architecture, staking mechanisms, AVS integration, and more. What would you like to know?", 
+          sender: 'eliza' 
+        }
+      ]);
+    } else if (selectedBox === 'movement') {
+      setMessages([
+        { 
+          text: "Hello! I'm Eliza, your Movement Labs assistant. I can help you understand Movement's blockchain solutions, scalability features, and ecosystem development. How can I assist you today?", 
+          sender: 'eliza' 
+        }
+      ]);
+    }
+  }, [selectedBox]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || rateLimitTimer > 0) return;
 
-    // Add user message
     const newMessages = [...messages, { text: inputMessage, sender: 'user' }];
-    
-    // Simulate Eliza response
-    const elizaResponse = getElizaResponse(inputMessage);
-    newMessages.push({ text: elizaResponse, sender: 'eliza' });
-    
     setMessages(newMessages);
     setInputMessage('');
-  };
+    setLoading(true);
 
-  const getElizaResponse = (input) => {
-    // Simple response patterns - you can expand these
-    const responses = [
-      { pattern: /how are you/i, response: "I'm doing well, how are you feeling?" },
-      { pattern: /hello|hi|hey/i, response: "Hello! How can I help you today?" },
-      { pattern: /bye|goodbye/i, response: "Goodbye! Take care!" },
-      { pattern: /help/i, response: "I'm here to help. What's on your mind?" },
-      // Add more patterns here
-    ];
+    const API_KEY = 'AIzaSyD5Rwsl5X6nBz2MtY14ME0Q-cFWyMdt6hA';
 
-    for (const { pattern, response } of responses) {
-      if (pattern.test(input)) {
-        return response;
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${selectedBox === 'eigen' 
+                ? "You are Eliza, an AI assistant specialized in EigenLayer. Provide helpful, accurate information about EigenLayer's technology, features, and ecosystem. Focus on restaking, AVS, and the overall architecture. " 
+                : "You are Eliza, an AI assistant specialized in Movement Labs. Provide helpful, accurate information about Movement Labs' technology, features, and ecosystem. "}
+                User question: ${inputMessage}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 500,
+          }
+        })
+      });
+
+      if (response.status === 429) {
+        // Rate limit hit - implement cooldown
+        setRateLimitTimer(15);
+        const countdown = setInterval(() => {
+          setRateLimitTimer(prev => {
+            if (prev <= 1) {
+              clearInterval(countdown);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        throw new Error('Rate limit reached. Please wait a moment before trying again.');
       }
-    }
 
-    return "Can you tell me more about that?";
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const elizaResponse = data.candidates[0].content.parts[0].text;
+
+      setMessages([...newMessages, { text: elizaResponse, sender: 'eliza' }]);
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages([
+        ...newMessages,
+        { 
+          text: error.message === 'Rate limit reached. Please wait a moment before trying again.'
+            ? `Please wait ${rateLimitTimer} seconds before sending another message.`
+            : "I apologize, but I'm having trouble connecting right now. Please try again in a moment.",
+          sender: 'eliza' 
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,7 +117,7 @@ const Eliza = () => {
               : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20'
           }`}>
             <p className="text-sm text-gray-300">
-              Empowering blockchain movement with innovative solutions and research.
+              Chat about Movement Labs ecosystem
             </p>
           </div>
         </div>
@@ -88,21 +137,16 @@ const Eliza = () => {
               : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20'
           }`}>
             <p className="text-sm text-gray-300">
-              Advanced blockchain scaling solutions with modular architecture.
+              Chat about EigenLayer technology
             </p>
           </div>
         </div>
       </div>
 
-      {/* Chatbot Container */}
+      {/* Chat Container */}
       <div className="w-full max-w-4xl mx-auto h-[70vh] flex flex-col 
                     border border-gray-700 rounded-xl overflow-hidden
                     bg-gray-900/50 backdrop-blur-sm shadow-xl">
-        {/* Chat Header */}
-        <div className="p-4 border-b border-gray-700 bg-gray-800/50">
-          <h2 className="text-xl font-semibold text-gray-100">Chat with Eliza</h2>
-        </div>
-
         {/* Messages Area */}
         <div className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-4">
@@ -124,6 +168,17 @@ const Eliza = () => {
                 </div>
               </div>
             ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-800 text-gray-100 p-4 rounded-lg shadow-lg">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -141,11 +196,12 @@ const Eliza = () => {
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white 
-                       rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg 
-                       shadow-purple-500/20 hover:shadow-purple-500/40 font-medium"
+              disabled={loading || !selectedBox || rateLimitTimer > 0}
+              className={`px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white 
+                       rounded-lg font-medium transition-all duration-200
+                       ${(loading || !selectedBox || rateLimitTimer > 0) ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
             >
-              Send
+              {rateLimitTimer > 0 ? `Wait ${rateLimitTimer}s` : 'Send'}
             </button>
           </form>
         </div>
