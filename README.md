@@ -1,6 +1,6 @@
 # InsightOps
 
-InsightOps is a platform that integrates plugin-eigenavs  that is made by multiple tools and APIs to provide comprehensive tracking of operators, AVS (Active Verification Service), and their related activities. 
+InsightOps is a comprehensive platform designed to provide in-depth tracking of operators, Active Verification Services (AVS), and their associated activities. As part of our platform, we developed a plugin named plugin-eigenavs, leveraging multiple tools and APIs, including the Dune API, to gather and present vital data on the blockchain ecosystem. 
 
 
 
@@ -20,6 +20,11 @@ We have utilized the **Dune API** for making this plugin named as plugin-eigenav
   - Twitter URL
   - Website URL
 - Track the **relationship between Operators and AVS** by providing either an operator or AVS address.
+
+---
+
+Autonome Deployment Link 
+- https://dev.autonome.fun/autonome/b57bf914-ffbf-4486-b9f4-844ad6dc0af5/details
 
 
 
